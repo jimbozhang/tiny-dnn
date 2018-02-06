@@ -48,6 +48,8 @@ inline backend_t default_engine() {
 #else
 #error "your compiler does not support AVX"
 #endif
+#elif defined CNN_USE_NNPACK
+  return backend_t::nnpack;
 #else
   return backend_t::internal;
 #endif

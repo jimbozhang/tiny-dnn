@@ -24,7 +24,25 @@ inline void maxpool_op_nnpack(const tensor_t &in_data,
 
   const nnp_size input_size = {params.in.width_, params.in.height_};
 
-  const nnp_padding input_padding = {0, 0, 0, 0};
+  nnp_padding input_padding = {0, 1, 2, 1};  // t, r, b, l
+
+  if (params.in.height_ %2 == 0) {
+    input_padding.top = 0;
+    input_padding.bottom = 2;
+  }
+  else {
+    input_padding.top = 1;
+    input_padding.bottom = 1;
+  }
+
+  if (params.in.width_ %2 == 0) {
+    input_padding.right = 2;
+    input_padding.left = 0;
+  }
+  else {
+    input_padding.left = 1;
+    input_padding.right = 1;
+  }
 
   const nnp_size pooling_size = {params.pool_size_x, params.pool_size_y};
 

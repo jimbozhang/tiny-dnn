@@ -184,16 +184,33 @@ class max_pooling_layer : public layer {
                       size_t outx,
                       size_t outy,
                       size_t c) {
-    size_t dxmax =
-      std::min(pooling_size_x, params_.in.width_ - outx * params_.stride_x);
+    int dx_begin, dx_end, dy_begin, dy_end;
 
-    size_t dymax =
-      std::min(pooling_size_y, params_.in.height_ - outy * params_.stride_y);
+    if (params_.in.width_ %2 != 0) {
+      dx_begin = -(int)pooling_size_x/2;
+      dx_end = pooling_size_x-(int)pooling_size_x/2;
+    }
+    else {
+      dx_begin = 0;
+      dx_end = std::min(pooling_size_x, params_.in.width_ - outy * params_.stride_x);
+    }
 
-    for (size_t dy = 0; dy < dymax; dy++) {
-      for (size_t dx = 0; dx < dxmax; dx++) {
-        size_t in_index = params_.in.get_index(outx * params_.stride_x + dx,
-                                               outy * params_.stride_y + dy, c);
+    if (params_.in.height_ %2 != 0) {
+      dy_begin = -(int)pooling_size_y/2;
+      dy_end = pooling_size_y-(int)pooling_size_y/2;
+    }
+    else {
+      dy_begin = 0;
+      dy_end = std::min(pooling_size_y, params_.in.height_ - outy * params_.stride_y);
+    }
+
+    for (int dy = dy_begin; dy < dy_end; dy++) {
+      for (int dx = dx_begin; dx < dx_end; dx++) {
+        int inx = outx * params_.stride_x + dx;
+        int iny = outy * params_.stride_y + dy;
+        if (inx < 0 || inx >= params_.in.width_ || iny < 0 || iny >= params_.in.height_)
+          continue;
+        size_t in_index = params_.in.get_index(inx, iny, c);
         size_t out_index = params_.out.get_index(outx, outy, c);
 
         if (in_index >= params_.in2out.size()) {
